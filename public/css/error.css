@@ -1,0 +1,75 @@
+/* Basic body styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Styling for the header */
+.vbook-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+  
+    color: #fff;
+}
+
+.vbook-btn {
+    background-color:#dc3545;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.vbook-btn:hover {
+    background-color: #dc3545;
+}
+
+.logout-btn {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.logout-btn:hover {
+    background-color: #c82333;
+}
+
+/* Error page specific styles */
+.error-container {
+    text-align: center;
+    padding: 50px 20px;
+    margin-top: 50px;
+}
+
+.error-container h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+.error-container p {
+    font-size: 1.2rem;
+    color: #777;
+    margin-bottom: 30px;
+}
+
+.error-back-btn {
+    text-decoration: none;
+    color: #fff;
+    background-color: #dc3545;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.error-back-btn:hover {
+    background-color:#dc3547;
+}

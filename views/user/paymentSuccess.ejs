@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Booking Status</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f8f9fa;
+        color: #333;
+      }
+      header {
+        background-color: #ffffff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .vbook-btn {
+        background-color: #ff033d;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 25px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+      }
+      .vbook-btn:hover {
+        background-color: #e6022f;
+      }
+      .logout-btn, .signin-btn {
+        background-color: #ff033d;
+        color: #ffff;
+        border: none;
+        padding: 12px 18px;
+        font-size: 16px;
+        border-radius: 25px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s ease;
+      }
+      .logout-btn:hover, .signin-btn:hover {
+        background-color: #ff033d;
+        color: #ffffff;
+      }
+      main {
+        padding: 40px 20px;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .status-header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .status-header h1 {
+        font-size: 2.5em;
+        color: #28a745;
+        margin-bottom: 10px;
+      }
+      .status-header p {
+        font-size: 1.2em;
+        color: #6c757d;
+      }
+      .booking-info {
+        background-color: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .booking-info h2 {
+        color: #ff033d;
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 1.8em;
+      }
+      .booking-info p {
+        margin: 10px 0;
+        font-size: 1.1em;
+      }
+      .property-images {
+        width: 100px;
+        height: 70px;
+        display: inline-block;
+        margin-right: 10px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        object-fit: cover;
+      }
+      .btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #ff033d;
+        color: white;
+        text-align: center;
+        border-radius: 25px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        margin-top: 30px;
+        font-size: 1.1em;
+        transition: background-color 0.3s ease;
+      }
+      .btn:hover {
+        background-color: #e6022f;
+      }
+      footer {
+        background-color: #ff033d;
+        color: white;
+        text-align: center;
+        padding: 15px 0;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="vbook-box">
+        <a href="/home"><button class="vbook-btn">VBOOK4U</button></a>
+      </div>
+      <div class="search">
+        <% if (userSession) { %>
+        <button class="logout-btn" onclick="window.location.href='/logout'">
+          Logout
+        </button>
+        <% } else { %>
+        <a href="/login"><button class="signin-btn">Sign In</button></a>
+        <% } %>
+      </div>
+    </header>
+
+    <main>
+      <div class="status-header">
+        <% if (booking.bookingStatus === "Pending") { %>
+          <h1 style="color: #e6022f;">Booking Pending</h1>
+          <p>Your booking is being pending.</p>
+        <% } else if (booking.bookingStatus === "Confirmed") { %>
+          <h1>Booking Confirmed!</h1>
+          <p>Great news! Your booking has been successfully confirmed.</p>
+        <% } %>
+      </div>
+      
+      <div class="booking-info">
+        <h2>Booking Details</h2>
+        <div class="image-gallery">
+          <% property.images.forEach(image => { %>
+          <img
+            class="property-images"
+            src="<%= image %>"
+            alt="<%= property.propertyName %> Image"
+          />
+          <% }); %>
+        </div>
+        <p><strong>Property:</strong> <%= property.propertyName %></p>
+        <p><strong>Price:</strong> ₹<%= booking.price %></p>
+        <p><strong>Check-in Date:</strong> <%= booking.checkIn %></p>
+        <p><strong>Check-out Date:</strong> <%= booking.checkOut %></p>
+        <p><strong>Booking Status:</strong> <%= booking.bookingStatus %></p> 
+        <p><strong>Coupon:</strong> <%= booking.couponName || 'None' %></p>
+      </div>
+      <% if (booking.bookingStatus === "Pending") { %>
+        <a href="/yourBooking" class="btn">Continue your Bookings</a>
+      <% } else if (booking.bookingStatus === "Confirmed") { %>
+        <a href="/yourBooking" class="btn">View Your Bookings</a>
+        
+      <% } %>
+     
+    </main>
+
+    
+  </body>
+</html>

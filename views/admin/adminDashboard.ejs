@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Vbook4U | Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/adminDashboard.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            width: 80%;
+            margin: 20px auto;
+        }
+        .daily-revenue, .monthly-revenue, .yearly-revenue {
+            margin-bottom: 10px;
+        }
+        canvas {
+            max-width: 50%;
+            margin-top: 10px;
+            max-height: 70%;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select {
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+        .revenue-section {
+            margin-bottom: 10px;
+        }
+       
+    </style>
+    
+  </head>
+  <body>
+    <header>
+      <div class="footer-links">
+        <button class="admin-info-button"><%= admin.fullname %></button>
+        <a href="#" class="vbook4u-link">Vbook4U.com</a>
+        <form action="/admin/logout" method="POST" class="logout-form">
+          <button type="submit" class="logout-button">Logout</button>
+        </form>
+      </div>
+    </header>
+    <% if (messages.error && messages.error.length > 0) { %>
+    <div id="error-message" class="error-message">
+      <% messages.error.forEach(function(msg) { %>
+      <p><%= msg %></p>
+      <% }); %>
+    </div>
+    <% } %> <% if (messages.success && messages.success.length > 0) { %>
+    <div id="success-message" class="success-message">
+      <% messages.success.forEach(function(msg) { %>
+      <p><%= msg %></p>
+      <% }); %>
+    </div>
+    <% } %>
+    <script>
+      // Function to hide flash messages after 2 seconds
+      function hideFlashMessages() {
+        setTimeout(function () {
+          var successMessage = document.getElementById("success-message");
+          var errorMessage = document.getElementById("error-message");
+          if (successMessage) {
+            successMessage.style.display = "none";
+          }
+          if (errorMessage) {
+            errorMessage.style.display = "none";
+          }
+        }, 2000); // 2000 milliseconds = 2 seconds
+      }
+      // Call the function after the DOM is fully loaded
+      document.addEventListener("DOMContentLoaded", hideFlashMessages);
+    </script>
+
+    <div class="container">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <a href="#" id="profileLink">PROFILE</a>
+        <a href="#" id="dashboardLink">DASHBOARD</a>
+        <a href="#" id="ownersLink">OWNERS</a>
+        <a href="#" id="usersLink">USERS</a>
+        <a href="#" id="categoriesLink">CATEGORIES</a>
+        <a href="#" id="salesReportLink">SALES REPORT</a>
+        <a href="#" id="bookingsLink">BOOKINGS</a>
+        <a href="#" id="couponLink">COUPONS</a>
+        <a href="#" id="editCouponLink">EDIT COUPON</a>
+        <a href="#" id="requestLink">REQUESTS</a>
+
+        <!-- Added REQUESTS link -->
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <!-- Confirmation Modal -->
+<div id="confirmationModal" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitle">Confirmation</h2>
+    <p id="modalMessage">Are you sure you want to perform this operation?</p>
+    <div class="modal-buttons">
+      <button id="confirmYes">Yes</button>
+      <button id="confirmNo">No</button>
+    </div>
+  </div>
+</div>
+        <!-- Profile Section -->
+        <% if (admin) { %>
+        <div id="profileSection">
+          <h2>Profile</h2>
+          <!-- Display admin profile details here -->
+          <table class="profile-table">
+            <tr>
+              <td>Name:</td>
+              <td><%= admin.fullname %></td>
+            </tr>
+            <tr>
+              <td>Email:</td>
+              <td><%= admin.email %></td>
+            </tr>
+            <tr>
+              <td>Phone No:</td>
+              <td><%= admin.phoneNumber %></td>
+            </tr>
+          </table>
+        </div>
+        <% } %>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" style="display: none">
+          <h2>Dashboard</h2>
+          <div class="dashboard-statistics">
+            <h3>Statistics</h3>
+            <table>
+              <tbody>
+                <tr>
+                  <td>Total Properties:</td>
+                  <td>
+                    <span id="totalProperties"><%= totalProperties %></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Total Bookings:</td>
+                  <td><span id="totalBookings"><%= totalBookings %></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="recent-bookings">
+            <h3>Recent Bookings</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Property Name</th>
+                  <th>Check-In</th>
+                  <th>Check-Out</th>
+                  <th>Price</th>
+                  <th>Coupon</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% 
+                bookings.sort((a, b) => new Date(b.dateInitiated) - new
+                Date(a.dateInitiated)); 
+                const recentBookings = bookings.slice(0, 5); 
+                recentBookings.forEach(booking => { %>
+                <tr>
+                  <td><%= booking.property.propertyName %></td>
+                  <td><%= booking.checkIn %></td>
+                  <td><%= booking.checkOut %></td>
+                  <td><%= booking.price %> ₹</td>
+                  <td><%= booking.couponName ? booking.couponName : "NONE" %></td>
+                  <td><%= booking.bookingStatus %></td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+          <!-- Content for Dashboard -->
+        </div>
+        <script>
+          document.addEventListener("DOMContentLoaded", function () {
+            displaySection("dashboardSection");
+          });
+          function displaySection(sectionId) {
+            // Hide all sections
+            var sections = document.querySelectorAll(".main-content > div");
+            sections.forEach(function (section) {
+              section.style.display = "none";
+            });
+
+            // Show the selected section
+            var selectedSection = document.getElementById(sectionId);
+            if (selectedSection) {
+              selectedSection.style.display = "block";
+            } else {
+              // Hide all sections if no section ID is provided
+              sections.forEach(function (section) {
+                section.style.display = "none";
+              });
+            }
+          }
+        </script>
+
+        <!-- Owners Section -->
+        <div id="ownersSection">
+          <h2>Owners</h2>
+          <div class="scrollable-section1">
+            <% if (owners.length > 0) { %>
+            <!-- Display owners as a styled table -->
+            <table class="owners-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone No</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% owners.forEach(function(owner) { %>
+                <tr>
+                  <td><%= owner.fullname %></td>
+                  <td><%= owner.email %></td>
+                  <td><%= owner.phoneNumber %></td>
+                  <td>
+                    <% if (owner.isBlocked) { %>
+                    <!-- If owner is blocked, show Unblock button -->
+                    <form
+                      method="POST"
+                      action="/admin/owners/<%= owner._id %>/unblock"
+                      class="action-form"
+                    >
+                      <button type="submit">Unblock</button>
+                    </form>
+                    <% } else { %>
+                    <!-- If owner is not blocked, show Block button -->
+                    <form
+                      method="POST"
+                      action="/admin/owners/<%= owner._id %>/block"
+                      class="action-form"
+                    >
+                      <button type="submit">Block</button>
+                    </form>
+                    <% } %>
+                  </td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+            <% } else { %>
+            <p>No owners found.</p>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Users Section -->
+        <div id="usersSection">
+          <h2>Users</h2>
+          <div class="scrollable-section1">
+            <% if (users.length > 0) { %>
+            <!-- Display users as a table -->
+            <table class="users-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone No</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% users.forEach(function(user) { %>
+                <tr>
+                  <td><%= user.fullname %></td>
+                  <td><%= user.email %></td>
+                  <td><%= user.phoneNumber %></td>
+                  <td>
+                    <% if (user.isBlocked) { %>
+                    <!-- If user is blocked, show Unblock button -->
+                    <form
+                      method="POST"
+                      action="/admin/users/<%= user._id %>/unblock"
+                      class="action-form"
+                    >
+                      <button type="submit">Unblock</button>
+                    </form>
+                    <% } else { %>
+                    <!-- If user is not blocked, show Block button -->
+                    <form
+                      method="POST"
+                      action="/admin/users/<%= user._id %>/block"
+                      class="action-form"
+                    >
+                      <button type="submit">Block</button>
+                    </form>
+                    <% } %>
+                  </td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+            <% } else { %>
+            <p>No users found.</p>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Categories Section -->
+        <div id="categoriesSection" style="display: none; padding: 10px 20px">
+          <h2>Categories</h2>
+
+          <% if (messages.categoryDeletedSuccess.length > 0) { %>
+          <div id="success-message" class="success-message">
+            <%= messages.categoryDeletedSuccess[0] %>
+          </div>
+          <% } %> <% if (categories.length > 0) { %>
+          <!-- Display existing categories as a table -->
+          <div class="scrollable-section2">
+            <table class="categories-table">
+              <thead>
+                <tr>
+                  <th>Category Name</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% categories.forEach(function(category) { %>
+                <tr>
+                  <td><%= category.name %></td>
+                  <td>
+                    <form
+                      method="POST"
+                      action="/admin/categories/<%= category._id %>/delete"
+                      style="display: inline"
+                    >
+                      <button class="btn-del" type="submit">Delete</button>
+                    </form>
+                    <form
+                      method="GET"
+                      action="/admin/categories/<%= category._id %>/edit"
+                      style="display: inline"
+                    >
+                      <button class="btn-edit" type="submit">Edit</button>
+                    </form>
+                  </td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+          <% } else { %>
+          <p>No categories found.</p>
+          <% } %>
+          <h3>Add New Category</h3>
+          <form id="addCategoryForm" method="POST" action="/admin/categories">
+            <table class="add-category-table">
+              <tr>
+                <td><label for="categoryName">Name:</label></td>
+                <td>
+                  <input
+                    type="text"
+                    id="categoryName"
+                    name="name"
+                    required
+                    pattern="[A-Za-z0-9./#]+"
+                    title="Only letters, numbers, ., /, and # allowed"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td><label for="categoryDescription">Description:</label></td>
+                <td>
+                  <textarea
+                    id="categoryDescription"
+                    name="description"
+                  ></textarea>
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td><button type="submit">Add Category</button></td>
+              </tr>
+            </table>
+          </form>
+        </div>
+
+        <div id="salesReportSection">
+          <h2>Sales Report</h2>
+            <!-- Graph 1: Daily Revenue -->
+        <div class="revenue-section daily-revenue">
+          <h3>Daily Revenue</h3>
+          <div>
+              <label for="dailyRevenueDate">Select Date:</label>
+              <input type="date" id="dailyRevenueDate" onchange="fetchDailyRevenueData()">
+          </div>
+          <canvas id="dailyRevenueChart"></canvas>
+      </div>
+  
+      <!-- Graph 2: Monthly Revenue -->
+      <div class="revenue-section monthly-revenue">
+          <h3>Monthly Revenue</h3>
+          <div>
+              <label for="monthlyRevenueDate">Select Month and Year:</label>
+              <input type="month" id="monthlyRevenueDate" onchange="fetchMonthlyRevenueData()">
+          </div>
+          <canvas id="monthlyRevenueChart"></canvas>
+      </div>
+  
+      <!-- Graph 3: Yearly Revenue -->
+      <div class="revenue-section yearly-revenue">
+          <h3>Yearly Revenue</h3>
+          <div>
+              <label for="yearlyRevenuePicker">Select Year:</label>
+              <select id="yearlyRevenuePicker" onchange="fetchYearlyRevenueData()">
+                  <option value="2024">2024</option>
+                  <option value="2025">2025</option>
+                  <option value="2026">2026</option>
+                  <option value="2027">2027</option>
+                  <option value="2028">2028</option>
+                  <option value="2029">2029</option>
+                  <option value="2030">2030</option>
+              </select>
+          </div>
+          <canvas id="yearlyRevenueChart"></canvas>
+      </div>
+        </div>    
+      
+        <script>
+          let dailyChart, monthlyChart, yearlyChart;
+  
+          // Function to fetch and update daily revenue data
+          function fetchDailyRevenueData() {
+              const selectedDate = document.getElementById('dailyRevenueDate').value;
+              const [year, month] = selectedDate.split('-');
+  
+              fetch(`/admin/revenue/daily?year=${year}&month=${month}`)
+                  .then(response => response.json())
+                  .then(data => {
+                      updateDailyRevenueChart(data);
+                  })
+                  .catch(error => console.error('Error fetching daily revenue data:', error));
+          }
+  
+          // Function to fetch and update monthly revenue data
+          function fetchMonthlyRevenueData() {
+              const selectedDate = document.getElementById('monthlyRevenueDate').value;
+              const [year, month] = selectedDate.split('-');
+  
+              fetch(`/admin/revenue/monthly?year=${year}&month=${month}`)
+                  .then(response => response.json())
+                  .then(data => {
+                      updateMonthlyRevenueChart(data);
+                  })
+                  .catch(error => console.error('Error fetching monthly revenue data:', error));
+          }
+  
+          // Function to fetch and update yearly revenue data
+          function fetchYearlyRevenueData() {
+              const selectedYear = document.getElementById('yearlyRevenuePicker').value;
+  
+              fetch(`/admin/revenue/yearly?year=${selectedYear}`)
+                  .then(response => response.json())
+                  .then(data => {
+                      updateYearlyRevenueChart(data);
+                  })
+                  .catch(error => console.error('Error fetching yearly revenue data:', error));
+          }
+  
+          function updateDailyRevenueChart(data) {
+              const ctx = document.getElementById('dailyRevenueChart').getContext('2d');
+              const labels = data.map(item => `Day ${item._id}`);
+              const values = data.map(item => item.totalRevenue);
+  
+              if (dailyChart) {
+                  dailyChart.destroy();
+              }
+  
+              dailyChart = new Chart(ctx, {
+                  type: 'bar',
+                  data: {
+                      labels: labels,
+                      datasets: [{
+                          label: 'Daily Revenue',
+                          data: values,
+                          backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                      }]
+                  },
+                  options: {
+                      scales: {
+                          y: {
+                              beginAtZero: true
+                          }
+                      }
+                  }
+              });
+          }
+  
+          function updateMonthlyRevenueChart(data) {
+              const ctx = document.getElementById('monthlyRevenueChart').getContext('2d');
+              const value = data[0]?.totalRevenue || 0;
+  
+              if (monthlyChart) {
+                  monthlyChart.destroy();
+              }
+  
+              monthlyChart = new Chart(ctx, {
+                  type: 'bar',
+                  data: {
+                      labels: ['Monthly Revenue'],
+                      datasets: [{
+                          label: 'Monthly Revenue',
+                          data: [value],
+                          backgroundColor: 'rgba(255, 99, 132, 0.6)'
+                      }]
+                  },
+                  options: {
+                      scales: {
+                          y: {
+                              beginAtZero: true
+                          }
+                      }
+                  }
+              });
+          }
+  
+          function updateYearlyRevenueChart(data) {
+              const ctx = document.getElementById('yearlyRevenueChart').getContext('2d');
+              const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+              const values = new Array(12).fill(0);
+  
+              data.forEach(item => {
+                  values[item._id - 1] = item.totalRevenue;
+              });
+  
+              if (yearlyChart) {
+                  yearlyChart.destroy();
+              }
+  
+              yearlyChart = new Chart(ctx, {
+                  type: 'bar',
+                  data: {
+                      labels: months,
+                      datasets: [{
+                          label: 'Yearly Revenue by Month',
+                          data: values,
+                          backgroundColor: 'rgba(153, 102, 255, 0.6)'
+                      }]
+                  },
+                  options: {
+                      scales: {
+                          y: {
+                              beginAtZero: true
+                          }
+                      }
+                  }
+              });
+          }
+  
+          // Initialize with current date/year
+          document.addEventListener('DOMContentLoaded', () => {
+              const currentDate = new Date();
+              document.getElementById('dailyRevenueDate').value = currentDate.toISOString().split('T')[0];
+              document.getElementById('monthlyRevenueDate').value = currentDate.toISOString().slice(0, 7);
+              document.getElementById('yearlyRevenuePicker').value = currentDate.getFullYear().toString();
+  
+              fetchDailyRevenueData();
+              fetchMonthlyRevenueData();
+              fetchYearlyRevenueData();
+          });
+      </script>
+      
+    
+      
+      
+
+        <!-- Bookings Section -->
+        <div id="bookingsSection" style="display: none">
+          <h2>Bookings</h2>
+          <div class="scrollable-section1">
+            <div class="scroll-stripe">
+              <table class="bookings-table">
+                <thead>
+                  <tr>
+                    <th>Booking ID</th>
+                    <th>Property Name</th>
+                    <th>User</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% bookings.forEach(function(booking) { %>
+                  <tr>
+                    <td><%= booking._id %></td>
+                    <td><%= booking.property.propertyName %></td>
+                    <td><%= booking.user.fullname %></td>
+                    <td>₹<%= booking.price %></td>
+                    <td><%= booking.bookingStatus %></td>
+                    <td>
+                      <% if (booking.bookingStatus !== 'Cancelled') { %>
+                      <!-- Only show the cancel button if the booking status is not 'Cancelled' -->
+                      <form
+                        method="POST"
+                        action="/admin/bookings/<%= booking._id %>/cancel"
+                        class="action-form"
+                      >
+                        <button type="submit">Cancel</button>
+                      </form>
+                      <% } %>
+                    </td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      <!-- Coupon Section -->
+<div id="couponSection" style="display: none; padding: 20px">
+  <h2 style="margin-bottom: 20px">Create Coupon</h2>
+  <form action="/admin/coupons/create" method="POST">
+    <div style="margin-bottom: 10px">
+      <label for="couponName" style="display: inline-block; width: 120px">Coupon Name:</label>
+      <input type="text" id="couponName" name="couponName" required maxlength="50" style="width: 200px; padding: 5px" />
+    </div>
+    <div style="margin-bottom: 10px">
+      <label for="category" style="display: inline-block; width: 120px">Category:</label>
+      <select id="category" name="category" style="width: 200px; padding: 5px">
+        <!-- Populate with available categories -->
+        <% categories.forEach(function(category) { %>
+          <option value="<%= category._id %>"><%= category.name %></option>
+        <% }); %>
+      </select>
+    </div>
+    <div style="margin-bottom: 10px">
+      <label for="expirationDate" style="display: inline-block; width: 120px">Expiration Date:</label>
+      <input type="date" id="expirationDate" name="expirationDate" required style="width: 200px; padding: 5px" />
+    </div>
+    <div style="margin-bottom: 10px">
+      <label for="fixedValue" style="display: inline-block; width: 120px">Fixed Value:</label>
+      <select id="fixedValue" name="fixedValue" style="width: 200px; padding: 5px">
+        <option value="100">₹100</option>
+        <option value="200">₹200</option>
+        <option value="300">₹300</option>
+        <option value="400">₹400</option>
+        <option value="500">₹500</option>
+      </select>
+    </div>
+    <div style="margin-bottom: 10px">
+      <label for="payMethod" style="display: inline-block; width: 120px">Payment Method:</label>
+      <select id="payMethod" name="payMethod" style="width: 200px; padding: 5px">
+        <option value="Online">Online</option>
+        <option value="PayAtProperty">Pay at Property</option>
+      </select>
+    </div>
+    <button type="submit" style="padding: 8px 16px; background-color: #ff0051; color: white; border: none; border-radius: 4px; cursor: pointer;">
+      Create Coupon
+    </button>
+  </form>
+</div>
+
+
+
+    
+<!-- Edit Coupon Section -->
+<div id="editCouponSection" style="display: none; padding: 20px;">
+  <h2>Edit Coupon</h2>
+  <div class="scrollable-section1">
+    <% if (coupon && coupon.length > 0) { %>
+    <table class="edit-coupon-table">
+      <thead>
+        <tr>
+          <th>Coupon Name</th>
+          <th>Category</th>
+          <th>Expiration Date</th>
+          <th>Fixed Value</th>
+          <th>Payment Method</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% coupon.forEach(function(coupon) { %>
+        <tr>
+          <td><%= coupon.code %></td>
+          <td><%= coupon.category ? coupon.category.name : 'No Category' %></td>
+          <td><%= coupon.expirationDate.toISOString().split('T')[0] %></td>
+          <td><%= coupon.fixedValue %></td>
+          <td><%= coupon.payMethod %></td>
+          <td class="action-column">
+            <form action="/admin/coupons/update/<%= coupon._id %>" method="POST">
+              <!-- Editable fields -->
+              <input type="text" name="code" value="<%= coupon.code %>" class="styled-input" required>
+              <select name="category" class="styled-input" required>
+                <% categories.forEach(function(category) { %>
+                  <option value="<%= category._id %>" <%= coupon.category && coupon.category.toString() === category._id.toString() ? 'selected' : '' %>><%= category.name %></option>
+                <% }); %>
+              </select>
+              <input type="date" name="expirationDate" value="<%= coupon.expirationDate.toISOString().split('T')[0] %>" class="styled-input" required>
+              <input type="number" name="fixedValue" value="<%= coupon.fixedValue %>" class="styled-input" required>
+              <select name="payMethod" class="styled-input" required>
+                <option value="Online" <%= coupon.payMethod === 'Online' ? 'selected' : '' %>>Online</option>
+                <option value="PayAtProperty" <%= coupon.payMethod === 'PayAtProperty' ? 'selected' : '' %>>Pay at Property</option>
+              </select>
+              <!-- Hidden input to send the coupon ID -->
+              <input type="hidden" name="couponId" value="<%= coupon._id %>">
+              <br><br>
+              <button type="submit">Update</button>
+            </form><br>
+            <!-- Delete form -->
+            <form action="/admin/coupons/delete/<%= coupon._id %>" method="POST" onsubmit="return confirm('Are you sure you want to delete this coupon?');">
+              <input type="hidden" name="_method" value="DELETE">
+              <button type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } else { %>
+    <p>No coupons found.</p>
+    <% } %>
+  </div>
+</div>
+
+
+
+
+
+        <!-- Requests Section -->
+        <div id="requestSection" style="display: none">
+          <h2>Requests</h2>
+          <div class="scrollable-section1">
+            <% if (requests.length > 0) { %>
+            <!-- Display requests as a table -->
+            <table class="requests-table">
+              <thead>
+                <tr>
+                  <th>Property Name</th>
+                  <th>Category</th>
+                  <th>Owner Name</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% requests.forEach(function(request) { %>
+                <tr>
+                  <td><%= request.propertyName %></td>
+                  <td><%= request.categoryName %></td>
+                  <td><%= request.owner.fullname %></td>
+                  <td>
+                    <form
+                      method="POST"
+                      action="/admin/requests/<%= request._id %>/approve"
+                      class="action-form"
+                    >
+                      <button type="submit">Accept</button>
+                    </form>
+                    <form
+                      method="POST"
+                      action="/admin/requests/<%= request._id %>/reject"
+                      class="action-form"
+                    >
+                      <button type="submit">Reject</button>
+                    </form>
+                  </td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+            <% } else { %>
+            <p>No requests found.</p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Get the modal
+      var modal = document.getElementById('confirmationModal');
+      var modalTitle = document.getElementById('modalTitle');
+      var modalMessage = document.getElementById('modalMessage');
+      var confirmYes = document.getElementById('confirmYes');
+      var confirmNo = document.getElementById('confirmNo');
+    
+      // Function to show modal
+      function showConfirmationModal(title, message, onConfirm) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        modal.style.display = "block";
+    
+        confirmYes.onclick = function() {
+          modal.style.display = "none";
+          onConfirm();
+        }
+    
+        confirmNo.onclick = function() {
+          modal.style.display = "none";
+        }
+      }
+    
+      // Close the modal when clicking outside of it
+      window.onclick = function(event) {
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      }
+    
+      // Modify existing forms to use the confirmation modal
+      document.addEventListener('submit', function(e) {
+        if (e.target.classList.contains('action-form')) {
+          e.preventDefault();
+          var action = e.target.getAttribute('action');
+          var actionType = action.includes('block') ? 'block' : 
+                           action.includes('unblock') ? 'unblock' :
+                           action.includes('delete') ? 'delete' :
+                           action.includes('Delete') ? 'Delete' :
+                           action.includes('cancel') ? 'cancel' :
+                           action.includes('Edit') ? 'Edit' :
+                           action.includes('approve') ? 'approve' :
+                           action.includes('edit') ? 'edit' :
+                           action.includes('reject') ? 'reject' : 'perform this action';
+    
+          showConfirmationModal(
+            'Confirm Action',
+            `Are you sure you want to ${actionType}?`,
+            function() {
+              e.target.submit();
+            }
+          );
+        }
+      });
+    
+      // For edit forms (assuming they have a class 'edit-form')
+      var editForms = document.querySelectorAll('.edit-form');
+      editForms.forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          showConfirmationModal(
+            'Confirm Edit',
+            'Are you sure you want to save these changes?',
+            function() {
+              form.submit();
+            }
+          );
+        });
+      });
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var profileLink = document.getElementById("profileLink");
+        var dashboardLink = document.getElementById("dashboardLink");
+        var ownersLink = document.getElementById("ownersLink");
+        var usersLink = document.getElementById("usersLink");
+        var categoriesLink = document.getElementById("categoriesLink");
+        var salesReportLink = document.getElementById("salesReportLink");
+        var bookingsLink = document.getElementById("bookingsLink");
+        var couponLink = document.getElementById("couponLink");
+        var requestLink = document.getElementById("requestLink");
+        var editCouponLink = document.getElementById("editCouponLink"); // Added editCouponLink
+    
+        profileLink.addEventListener("click", function (event) {
+          event.preventDefault();
+          displaySection("profileSection");
+        });
+    
+        dashboardLink.addEventListener("click", function (event) {
+          event.preventDefault();
+          displaySection("dashboardSection");
+        });
+    
+        ownersLink.addEventListener("click", function (event) {
+          event.preventDefault();
+          displaySection("ownersSection");
+        });
+    
+        usersLink.addEventListener("click", function (event) {
+          event.preventDefault();
+          displaySection("usersSection");
+        });
+    
+        categoriesLink.addEventListener("click", function (event) {
+          event.preventDefault();
+          displaySection("categoriesSection");
+        });
+    
+        salesReportLink.addEventListener("click", function (event) {
+          event.preventDefault();
+          displaySection("salesReportSection");
+        });
+    
+        bookingsLink.addEventListener("click", function (event) {
+          event.preventDefault();
+          displaySection("bookingsSection");
+        });
+    
+        couponLink.addEventListener("click", function (event) {
+          event.preventDefault();
+          displaySection("couponSection");
+        });
+    
+        requestLink.addEventListener("click", function (event) {
+          event.preventDefault();
+          displaySection("requestSection");
+        });
+    
+        editCouponLink.addEventListener("click", function (event) { // Added event listener for editCouponLink
+          event.preventDefault();
+          displaySection("editCouponSection"); // Display the editCouponSection
+        });
+      });
+    </script>
+    
+  </body>
+</html>

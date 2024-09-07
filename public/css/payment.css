@@ -1,0 +1,200 @@
+/* Global Styles */
+html, body {
+  height: 100%;
+ 
+ 
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  position: relative;
+  overflow-x: hidden;
+  padding-bottom: 100px; /* Height of the footer */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.loader {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+  display: none; /* Initially hidden */
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.btn-online{
+  background-color: #ff006a;
+  border: none;
+  border-radius: 20px;
+  color: #fff;
+  cursor: pointer;
+  padding: 10px 20px;
+  transition: background-color 0.3s;
+  align-self: center;
+}
+
+.error-message {
+  display: none; /* Hide error message by default */
+  color: red;
+}
+
+input:invalid + .error-message {
+  display: block; /* Show error message when input is invalid */
+}
+
+/* Header Styles */
+/* ... (no changes) */
+
+/* Main Content Styles */
+main {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Property Info Styles */
+.property-info {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.property-info h2 {
+  margin: 0 0 10px;
+}
+
+.property-info p {
+  margin: 5px 0;
+}
+
+.property-info .total-price {
+  color: #ff006a;
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+/* Form Styles */
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: 600px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.form-group label {
+  margin-right: 10px;
+  white-space: nowrap;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="checkbox"] {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #bfbfbf;
+  flex: 1;
+}
+
+input[type="checkbox"] {
+  margin-right: 5px;
+}
+
+.payment-options {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+/* Button Styles */
+button[type="submit"] {
+  background-color: #ff006a;
+  border: none;
+  border-radius: 20px;
+  color: #fff;
+  cursor: pointer;
+  padding: 10px 20px;
+  transition: background-color 0.3s;
+  align-self: center;
+}
+
+button[type="submit"]:hover {
+  background-color: #ff0051;
+}
+
+.vbook-box {
+  margin-left: 20px;
+  margin-top: 10px;
+}
+
+.vbook-btn {
+  background-color: #ff006a;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 14px 20px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+.search {
+  margin-right: 20px;
+}
+.coupon {
+  border: 1px #ccc;
+  color: #ffffff;
+  background-color: #ff0051;
+  padding: 10px 20px;
+  border-radius: 5px;
+  gap: 20px;
+  cursor: pointer;
+}
+.coupon-field{
+  width: 50%;
+  padding: 0px 10px;
+}
+.logout-btn {
+  position: absolute;
+  background-color: #ff006a;
+  border: none;
+  border-radius: 20px;
+  color: #fff;
+  cursor: pointer;
+  font-size: larger;
+  font-family: "Poppins", sans-serif;
+  padding: 8px 20px;
+  margin-left: 1450px;
+  margin-top: -43px;
+}
+
+/* Footer Styles */
+/* ... (no changes) */
+
+/* Additional Styles */
+/* ... (no changes) */
