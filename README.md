@@ -9,7 +9,6 @@ VBOOK4U is a **property rental platform** designed to handle three different rol
 - **Payment Gateway**: Razorpay
 - **Database**: MongoDB
 - **File Uploads**: Multer
-- **Image Storage**: AWS (Amazon Web Services)
 - **Authentication**: Passport.js
 - **Validation**: Express Validator
 - **Reports & Data Visualization**: Chart.js
@@ -30,8 +29,8 @@ VBOOK4U is a **property rental platform** designed to handle three different rol
 
 ### Additional Features
 - Integrated Razorpay for secure payment processing
-- AWS for image storage and Multer for file handling
-- Passport.js authentication
+- Multer for image storage and for file handling
+- Express-session authentication
 - Chart.js for revenue reporting
 - Express Validator for secure data validation
 - Dynamic views using EJS templating
@@ -40,7 +39,7 @@ VBOOK4U is a **property rental platform** designed to handle three different rol
 - Node.js
 - MongoDB
 - Razorpay account
-- AWS account
+- Twillio
 
 ## Installation
 
