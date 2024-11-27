@@ -45,7 +45,7 @@ VBOOK4U is a **property rental platform** designed to handle three different rol
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/vbook4u.git
+git clone https://github.com/vishdev-git/vbook4u.git
 cd vbook4u
 ```
 
